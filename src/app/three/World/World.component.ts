@@ -22,7 +22,7 @@ export class World {
     this.resources.on('ready', () => {
       console.log('loaded');
       this.island = new Island(this.threeContainer);
-      this.cloud = new Cloud(this.threeContainer);
+      // this.cloud = new Cloud(this.threeContainer);
 
       this.environment = new Environment(this.threeContainer);
     });

@@ -1,3 +1,4 @@
+import { Directive, HostListener } from '@angular/core';
 import * as THREE from 'three';
 import { Camera } from './Camera.component';
 import { Renderer } from './Renderer.component';
@@ -8,6 +9,7 @@ import { Time } from './Utils/Time.component';
 import { Debug } from './World/Debug.component';
 import { World } from './World/World.component';
 
+@Directive()
 export class ThreeContainer {
   scene!: THREE.Scene;
   sizes!: Sizes;
@@ -17,6 +19,14 @@ export class ThreeContainer {
   resources!: Resources;
   world!: World;
   debug!: Debug;
+  raycaster: THREE.Raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+  currentIntersect: any;
+
+  @HostListener('click', ['$event']) onclick(event: MouseEvent): void {
+    const currentIslandName = this.currentIntersect?.object?.parent?.name;
+    console.log('inside', currentIslandName);
+  }
 
   constructor(public canvas: HTMLCanvasElement) {
     //Setup
@@ -60,5 +70,26 @@ export class ThreeContainer {
     this.camera.update();
     this.renderer.update();
     this.world.cloud?.update();
+
+    if (this.world?.island?.sceneMeshes) {
+      this.raycaster.setFromCamera(this.mouse, this.camera.camera);
+      const intersects = this.raycaster.intersectObjects(
+        this.world?.island?.sceneMeshes,
+        true
+      );
+      if (intersects.length) {
+        if (this.currentIntersect == null) {
+          document.documentElement.style.cursor = 'pointer';
+          console.log('mouse enter');
+        }
+        this.currentIntersect = intersects[0];
+      } else {
+        if (this.currentIntersect) {
+          document.documentElement.style.cursor = 'auto';
+          console.log('mouse leave');
+        }
+        this.currentIntersect = null;
+      }
+    }
   }
 }
